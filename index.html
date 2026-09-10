@@ -7,7 +7,7 @@
   <title>Stroomaansluitingen | Stad Brugge</title>
 
   <script type="module" src="https://js.arcgis.com/5.1/"></script>
-  <link rel="stylesheet" href="./styles.css?v=21" />
+  <link rel="stylesheet" href="./styles.css?v=22" />
 </head>
 
 <body>
@@ -37,7 +37,15 @@
   </header>
 
   <main class="app-shell">
-    <aside id="sidePanel" class="side-panel">
+    <aside id="sidePanel" class="side-panel" aria-label="Selectie en details">
+      <div class="mobile-sheet-bar">
+        <div class="mobile-sheet-handle" aria-hidden="true"></div>
+        <div class="mobile-sheet-row">
+          <strong>Selectie &amp; details</strong>
+          <button id="mobilePanelClose" class="mobile-panel-close" type="button" aria-label="Sluit selectie en details">×</button>
+        </div>
+      </div>
+
       <div class="selection-mode-switch" role="group" aria-label="Selectiemodus">
         <button id="singleModeButton" class="selection-mode-button is-active" type="button" aria-pressed="true">
           <span class="selection-mode-icon" aria-hidden="true">●</span>
@@ -168,6 +176,14 @@
     </section>
   </main>
 
+  <button
+    id="mobilePanelBackdrop"
+    class="mobile-panel-backdrop is-hidden"
+    type="button"
+    aria-label="Sluit selectie en details"
+    tabindex="-1"
+  ></button>
+
   <div id="helpOverlay" class="help-overlay is-hidden" aria-hidden="true">
     <section
       id="helpDialog"
@@ -251,6 +267,6 @@
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <script type="module" src="./app.js?v=21"></script>
+  <script type="module" src="./app.js?v=22"></script>
 </body>
 </html>

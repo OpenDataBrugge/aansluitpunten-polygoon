@@ -1239,3 +1239,406 @@ arcgis-map.area-drawing {
     padding: 12px 18px 16px;
   }
 }
+
+
+/* ==========================================================================
+   v22 — Eén responsive app voor desktop én mobiel
+   Desktopopmaak blijft gebaseerd op v21.
+   ========================================================================== */
+
+.mobile-sheet-bar,
+.mobile-panel-backdrop {
+  display: none;
+}
+
+/* Kleine verbetering voor touch: minimumhoogte zonder desktoplook te wijzigen. */
+@media (pointer: coarse) {
+  button {
+    touch-action: manipulation;
+  }
+}
+
+@media (max-width: 900px) {
+  :root {
+    --panel-width: 100vw;
+  }
+
+  html,
+  body {
+    height: 100%;
+    height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+  .app-header {
+    padding-left: 8px;
+    padding-right: max(8px, env(safe-area-inset-right));
+  }
+
+  .brand {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .brand-title-widget {
+    min-width: 0;
+    padding-left: 5px;
+  }
+
+  .brand-title-widget h1 {
+    font-size: clamp(16px, 4.6vw, 20px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .header-actions {
+    flex: 0 0 auto;
+    margin-right: 0;
+  }
+
+  .header-help-button,
+  .mobile-toggle {
+    min-width: 40px;
+    min-height: 40px;
+    height: 40px;
+  }
+
+  .mobile-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0;
+  }
+
+  .app-shell {
+    height: calc(100dvh - var(--header-height));
+  }
+
+  .map-panel {
+    width: 100%;
+    height: 100%;
+  }
+
+  arcgis-map {
+    width: 100%;
+    height: 100%;
+  }
+
+  /*
+    Mobiel wordt het zijpaneel een bottom sheet.
+    Daardoor blijft de kaart het hoofdscherm en is dezelfde HTML/JS bruikbaar
+    op desktop, tablet en smartphone.
+  */
+  .side-panel {
+    position: fixed;
+    z-index: 5000;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    width: 100vw;
+    min-width: 0;
+    height: min(74dvh, 680px);
+    max-height: calc(100dvh - var(--header-height) - 8px);
+    padding-bottom: env(safe-area-inset-bottom);
+    border: 0;
+    border-top: 1px solid #cfd2d6;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0 -10px 34px rgba(0,0,0,.24);
+    transform: translateY(calc(100% + 18px));
+    transition: transform .22s ease;
+    overflow: hidden;
+  }
+
+  .side-panel.is-open {
+    transform: translateY(0);
+  }
+
+  .mobile-sheet-bar {
+    display: block;
+    flex: 0 0 auto;
+    padding: 7px 12px 8px;
+    border-bottom: 1px solid #e0e2e5;
+    background: #fff;
+  }
+
+  .mobile-sheet-handle {
+    width: 42px;
+    height: 4px;
+    margin: 0 auto 7px;
+    border-radius: 999px;
+    background: #c4c7cc;
+  }
+
+  .mobile-sheet-row {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .mobile-sheet-row strong {
+    font-size: 13px;
+    color: #272b30;
+  }
+
+  .mobile-panel-close {
+    width: 36px;
+    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 4px;
+    background: #f2f3f4;
+    color: #34383f;
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .mobile-panel-close:hover {
+    background: #e6e8ea;
+  }
+
+  .mobile-panel-backdrop {
+    display: block;
+    position: fixed;
+    z-index: 4990;
+    inset: var(--header-height) 0 0;
+    width: 100%;
+    height: auto;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    background: rgba(20,24,31,.24);
+  }
+
+  .selection-mode-switch {
+    flex: 0 0 auto;
+  }
+
+  .selection-mode-button {
+    min-height: 58px;
+  }
+
+  .selection-mode-button small {
+    white-space: normal;
+  }
+
+  #singleModePanel,
+  #areaModePanel {
+    min-width: 0;
+  }
+
+  .pager {
+    flex: 0 0 44px;
+  }
+
+  .pager-button {
+    min-width: 44px;
+    min-height: 44px;
+    font-size: 17px;
+  }
+
+  .details-scroll,
+  .area-details-scroll {
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
+
+  .feature-details,
+  .area-selected-details {
+    padding-bottom: max(24px, env(safe-area-inset-bottom));
+  }
+
+  .arcade-card {
+    max-width: none;
+  }
+
+  .copy-button,
+  .selected-point-action,
+  .area-button,
+  .copy-area-button {
+    min-height: 44px;
+  }
+
+  .selected-point-action {
+    min-width: 44px;
+  }
+
+  .area-tools-buttons {
+    align-items: stretch;
+  }
+
+  .area-button-primary,
+  .area-button-secondary {
+    min-height: 44px;
+  }
+
+  .area-selection-result {
+    align-items: stretch;
+  }
+
+  .copy-area-button {
+    align-self: stretch;
+  }
+
+  /* De zoekbalk mag op kleine schermen niet over de volledige kaart lopen. */
+  arcgis-search {
+    max-width: min(280px, calc(100vw - 112px));
+  }
+
+  .toast {
+    bottom: max(18px, calc(env(safe-area-inset-bottom) + 10px));
+    width: max-content;
+    max-width: calc(100vw - 28px);
+    text-align: center;
+  }
+}
+
+@media (max-width: 600px) {
+  .brand-logo-widget {
+    width: 39px;
+    min-width: 39px;
+  }
+
+  .brugge-logo {
+    width: 32px;
+  }
+
+  .header-help-label {
+    display: none;
+  }
+
+  .header-help-button {
+    width: 40px;
+    padding: 5px;
+    justify-content: center;
+  }
+
+  .selection-mode-button {
+    padding: 7px 6px;
+    gap: 5px;
+  }
+
+  .selection-mode-icon {
+    font-size: 14px;
+  }
+
+  .selection-mode-button strong {
+    font-size: 11px;
+  }
+
+  .selection-mode-button small {
+    font-size: 8px;
+  }
+
+  .empty-card,
+  .area-empty-state {
+    height: auto;
+    min-height: 104px;
+    padding: 16px 18px;
+  }
+
+  .feature-details {
+    padding: 14px 14px 22px;
+  }
+
+  .area-selected-details {
+    padding: 12px 12px 22px;
+  }
+
+  .arcade-header-main {
+    padding-left: 11px;
+  }
+
+  .copy-button {
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+
+  .location-section,
+  .total-section {
+    padding-left: 11px;
+    padding-right: 11px;
+  }
+
+  .table-head span,
+  .connection-row span {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .connection-group {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .area-tools {
+    padding: 10px;
+  }
+
+  .area-tools-buttons {
+    gap: 6px;
+  }
+
+  .area-button {
+    padding-left: 8px;
+    padding-right: 8px;
+    font-size: 11px;
+  }
+
+  .area-selection-result {
+    flex-direction: column;
+  }
+
+  .copy-area-button {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .selected-point-card {
+    margin-bottom: 10px;
+  }
+
+  .help-dialog {
+    max-height: 90dvh;
+  }
+}
+
+@media (max-width: 380px) {
+  .brand-title-widget h1 {
+    font-size: 15px;
+  }
+
+  .brand-logo-widget {
+    width: 35px;
+    min-width: 35px;
+  }
+
+  .brugge-logo {
+    width: 29px;
+  }
+
+  .selection-mode-button small {
+    display: none;
+  }
+
+  .selection-mode-button {
+    min-height: 50px;
+  }
+
+  arcgis-search {
+    max-width: calc(100vw - 96px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .side-panel {
+    transition: none !important;
+  }
+}

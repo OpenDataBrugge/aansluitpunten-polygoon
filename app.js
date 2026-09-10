@@ -1,6 +1,6 @@
-import { CONFIG } from "./config.js?v=21";
+import { CONFIG } from "./config.js?v=22";
 
-const APP_VERSION = "21.0.0";
+const APP_VERSION = "22.0.0";
 console.info(`Stroomaansluitingen app v${APP_VERSION}`);
 
 const $ = (id) => document.getElementById(id);
@@ -9,6 +9,8 @@ const mapElement = $("map");
 const toastElement = $("toast");
 const sidePanel = $("sidePanel");
 const mobilePanelToggle = $("mobilePanelToggle");
+const mobilePanelClose = $("mobilePanelClose");
+const mobilePanelBackdrop = $("mobilePanelBackdrop");
 
 const helpButton = $("helpButton");
 const helpOverlay = $("helpOverlay");
@@ -143,9 +145,71 @@ function showToast(message, isError = false) {
   toastTimer = setTimeout(() => toastElement.classList.remove("toast--visible"), 2200);
 }
 
-mobilePanelToggle.addEventListener("click", () => {
-  sidePanel.classList.toggle("is-open");
-});
+const MOBILE_BREAKPOINT = 900;
+const mobileMedia = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+
+function isMobileLayout() {
+  return mobileMedia.matches;
+}
+
+function openMobilePanel() {
+  if (!isMobileLayout()) return;
+
+  sidePanel.classList.add("is-open");
+  mobilePanelBackdrop.classList.remove("is-hidden");
+  mobilePanelBackdrop.setAttribute("aria-hidden", "false");
+  mobilePanelToggle.setAttribute("aria-expanded", "true");
+}
+
+function closeMobilePanel() {
+  if (!isMobileLayout()) return;
+
+  sidePanel.classList.remove("is-open");
+  mobilePanelBackdrop.classList.add("is-hidden");
+  mobilePanelBackdrop.setAttribute("aria-hidden", "true");
+  mobilePanelToggle.setAttribute("aria-expanded", "false");
+}
+
+function toggleMobilePanel() {
+  if (!isMobileLayout()) return;
+
+  if (sidePanel.classList.contains("is-open")) {
+    closeMobilePanel();
+  } else {
+    openMobilePanel();
+  }
+}
+
+function syncResponsiveLayout() {
+  if (isMobileLayout()) {
+    mobilePanelToggle.setAttribute(
+      "aria-expanded",
+      String(sidePanel.classList.contains("is-open"))
+    );
+    return;
+  }
+
+  // Op desktop is het zijpaneel altijd zichtbaar en is geen backdrop nodig.
+  sidePanel.classList.remove("is-open");
+  mobilePanelBackdrop.classList.add("is-hidden");
+  mobilePanelBackdrop.setAttribute("aria-hidden", "true");
+  mobilePanelToggle.setAttribute("aria-expanded", "false");
+}
+
+mobilePanelToggle.setAttribute("aria-controls", "sidePanel");
+mobilePanelToggle.setAttribute("aria-expanded", "false");
+
+mobilePanelToggle.addEventListener("click", toggleMobilePanel);
+mobilePanelClose.addEventListener("click", closeMobilePanel);
+mobilePanelBackdrop.addEventListener("click", closeMobilePanel);
+
+if (typeof mobileMedia.addEventListener === "function") {
+  mobileMedia.addEventListener("change", syncResponsiveLayout);
+} else {
+  mobileMedia.addListener(syncResponsiveLayout);
+}
+
+syncResponsiveLayout();
 
 let helpPreviouslyFocused = null;
 
@@ -247,11 +311,19 @@ sketchViewModel.on("create", async (event) => {
     areaDrawing = false;
     setDrawingUi(false);
     await selectFeaturesInPolygon(event.graphic.geometry);
+
+    if (isMobileLayout()) {
+      openMobilePanel();
+    }
   }
 
   if (event.state === "cancel") {
     areaDrawing = false;
     setDrawingUi(false);
+
+    if (isMobileLayout()) {
+      openMobilePanel();
+    }
   }
 });
 
@@ -446,6 +518,11 @@ function startAreaDrawing() {
 
   areaDrawing = true;
   setDrawingUi(true);
+
+  if (isMobileLayout()) {
+    closeMobilePanel();
+    showToast("Teken het gebied op de kaart en dubbelklik om af te sluiten.");
+  }
 
   try {
     sketchViewModel.create("polygon");
@@ -786,6 +863,13 @@ function createSelectedConnectionRow(label, value) {
 async function focusAreaFeature(feature) {
   if (!feature?.geometry) return;
 
+  // Op mobiel sluiten we het detailpaneel zodat het gekozen punt ook echt
+  // zichtbaar is op de kaart. De gebruiker kan het paneel via de header
+  // onmiddellijk opnieuw openen.
+  if (isMobileLayout()) {
+    closeMobilePanel();
+  }
+
   // In gebiedsmodus blijft de meervoudige selectie actief. We zoomen enkel
   // naar het gekozen punt zonder van selectiemodus te veranderen.
   try {
@@ -1058,8 +1142,8 @@ function selectFeature(feature) {
     rood250: getFieldValue(feature, "rood250")
   });
 
-  if (window.innerWidth <= 900) {
-    sidePanel.classList.add("is-open");
+  if (isMobileLayout()) {
+    openMobilePanel();
   }
 }
 
