@@ -1,6 +1,6 @@
-import { CONFIG } from "./config.js?v=19";
+import { CONFIG } from "./config.js?v=21";
 
-const APP_VERSION = "19.0.0";
+const APP_VERSION = "21.0.0";
 console.info(`Stroomaansluitingen app v${APP_VERSION}`);
 
 const $ = (id) => document.getElementById(id);
@@ -9,6 +9,12 @@ const mapElement = $("map");
 const toastElement = $("toast");
 const sidePanel = $("sidePanel");
 const mobilePanelToggle = $("mobilePanelToggle");
+
+const helpButton = $("helpButton");
+const helpOverlay = $("helpOverlay");
+const helpDialog = $("helpDialog");
+const closeHelpButton = $("closeHelpButton");
+const closeHelpFooterButton = $("closeHelpFooterButton");
 
 const noSelection = $("noSelection");
 const featureDetails = $("featureDetails");
@@ -139,6 +145,45 @@ function showToast(message, isError = false) {
 
 mobilePanelToggle.addEventListener("click", () => {
   sidePanel.classList.toggle("is-open");
+});
+
+let helpPreviouslyFocused = null;
+
+function openHelp() {
+  helpPreviouslyFocused = document.activeElement;
+  helpOverlay.classList.remove("is-hidden");
+  helpOverlay.setAttribute("aria-hidden", "false");
+  document.body.classList.add("help-open");
+
+  requestAnimationFrame(() => {
+    closeHelpButton.focus();
+  });
+}
+
+function closeHelp() {
+  helpOverlay.classList.add("is-hidden");
+  helpOverlay.setAttribute("aria-hidden", "true");
+  document.body.classList.remove("help-open");
+
+  if (helpPreviouslyFocused && typeof helpPreviouslyFocused.focus === "function") {
+    helpPreviouslyFocused.focus();
+  }
+}
+
+helpButton.addEventListener("click", openHelp);
+closeHelpButton.addEventListener("click", closeHelp);
+closeHelpFooterButton.addEventListener("click", closeHelp);
+
+helpOverlay.addEventListener("click", (event) => {
+  if (event.target === helpOverlay) {
+    closeHelp();
+  }
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !helpOverlay.classList.contains("is-hidden")) {
+    closeHelp();
+  }
 });
 
 const [

@@ -1,33 +1,21 @@
-# Stroomaansluitingen — v19 logische selectiemodi
+# Stroomaansluitingen — v21 helpfunctie
 
-Deze versie bouwt voort op v18 en maakt de interactie duidelijker.
+Deze versie is gebaseerd op de eerdere v19-opmaak. De Brugge.be-restyling uit
+v20 is dus niet overgenomen.
 
-Bovenaan de zijbalk staat nu een expliciete keuze:
+Nieuw:
+- Help-knop rechts in de blauwe header;
+- korte uitleg van de werking van het loket;
+- uitleg van selectie van één punt;
+- uitleg van bladeren met de teller;
+- uitleg van selectie van meerdere punten via een polygoon;
+- uitleg van het kopiëren van één of meerdere aansluitpunt-ID's;
+- helpvenster kan gesloten worden met `×`, `Begrepen`, klik naast het venster
+  of de Escape-toets;
+- op mobiel opent de help als een paneel onderaan.
 
-- **1 punt — Klik op de kaart**
-- **Meerdere punten — Teken een gebied**
-
-Gedrag:
-
-## 1 punt
-- de teller met vorige/volgende is zichtbaar;
-- een klik op een stroompunt toont één detailkaart;
-- de individuele Kopieer-knop blijft behouden;
-- gebiedstools zijn volledig verborgen.
-
-## Meerdere punten
-- de teller voor één punt verdwijnt;
-- de gebiedstools worden zichtbaar;
-- gewone klikken op losse punten doen niets;
-- de gebruiker tekent een polygoon;
-- alle geselecteerde stroompunten worden gemarkeerd;
-- alle detailkaarten van de selectie verschijnen in de zijbalk;
-- alle ID's kunnen in één keer gekopieerd worden;
-- per detailkaart blijft een individuele kopieerknop beschikbaar.
-
-Bij het wisselen van modus wordt de oude selectie bewust opgeruimd. Daardoor
-staan een selectie van één punt en een gebiedsselectie nooit tegelijk actief.
+Alle bestaande functionaliteit van v19 blijft behouden.
 
 Na deployment moet de console tonen:
 
-`Stroomaansluitingen app v19.0.0`
+`Stroomaansluitingen app v21.0.0`
