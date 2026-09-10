@@ -1,28 +1,33 @@
-# Stroomaansluitingen — v17 polygoonselectie
+# Stroomaansluitingen — v19 logische selectiemodi
 
-Deze versie bouwt voort op de werkende v16/v15.
+Deze versie bouwt voort op v18 en maakt de interactie duidelijker.
 
-Nieuw:
-- knop **Selecteer gebied** onder de teller;
-- de gebruiker kan rechtstreeks op de kaart een polygoon tekenen;
-- dubbelklik sluit de polygoon af;
-- alle stroompunten die de polygoon raken worden ruimtelijk geselecteerd;
-- de geselecteerde punten worden op de kaart gemarkeerd;
-- de zijbalk toont alleen het aantal geselecteerde punten, geen scrollbare lijst;
-- knop **Kopieer X ID's** kopieert alle `AANSLUITPUNT_ID`-waarden;
-- de ID's worden standaard één per regel naar het klembord gekopieerd;
-- **Wis selectie** verwijdert de polygoon en de gebiedshighlight;
-- tijdens het tekenen wordt de gewone puntselectie tijdelijk genegeerd.
+Bovenaan de zijbalk staat nu een expliciete keuze:
 
-Bestaande functies blijven behouden:
-- geen kaartpopup;
-- detailkaart in Arcade-stijl;
-- kopieerknop voor één aansluitpunt;
-- teller met vorige/volgende;
-- automatisch zoomen naar zoomniveau 16.5;
-- automatische keuze van de juiste featurelaag;
-- Experience Builder-achtige header.
+- **1 punt — Klik op de kaart**
+- **Meerdere punten — Teken een gebied**
 
-Na deployment hoort in de console te staan:
+Gedrag:
 
-`Stroomaansluitingen app v17.0.0`
+## 1 punt
+- de teller met vorige/volgende is zichtbaar;
+- een klik op een stroompunt toont één detailkaart;
+- de individuele Kopieer-knop blijft behouden;
+- gebiedstools zijn volledig verborgen.
+
+## Meerdere punten
+- de teller voor één punt verdwijnt;
+- de gebiedstools worden zichtbaar;
+- gewone klikken op losse punten doen niets;
+- de gebruiker tekent een polygoon;
+- alle geselecteerde stroompunten worden gemarkeerd;
+- alle detailkaarten van de selectie verschijnen in de zijbalk;
+- alle ID's kunnen in één keer gekopieerd worden;
+- per detailkaart blijft een individuele kopieerknop beschikbaar.
+
+Bij het wisselen van modus wordt de oude selectie bewust opgeruimd. Daardoor
+staan een selectie van één punt en een gebiedsselectie nooit tegelijk actief.
+
+Na deployment moet de console tonen:
+
+`Stroomaansluitingen app v19.0.0`

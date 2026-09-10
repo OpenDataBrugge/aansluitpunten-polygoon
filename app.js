@@ -1,6 +1,6 @@
-import { CONFIG } from "./config.js?v=17";
+import { CONFIG } from "./config.js?v=19";
 
-const APP_VERSION = "17.0.0";
+const APP_VERSION = "19.0.0";
 console.info(`Stroomaansluitingen app v${APP_VERSION}`);
 
 const $ = (id) => document.getElementById(id);
@@ -27,12 +27,20 @@ const previousFeatureButton = $("previousFeature");
 const nextFeatureButton = $("nextFeature");
 const pagerText = $("pagerText");
 
+const singleModeButton = $("singleModeButton");
+const areaModeButton = $("areaModeButton");
+const singleModePanel = $("singleModePanel");
+const areaModePanel = $("areaModePanel");
+const singleDetailsScroll = $("singleDetailsScroll");
+const areaEmptyState = $("areaEmptyState");
+
 const drawAreaButton = $("drawAreaButton");
 const drawAreaButtonText = $("drawAreaButtonText");
 const clearAreaButton = $("clearAreaButton");
 const areaInstruction = $("areaInstruction");
 const areaSelectionResult = $("areaSelectionResult");
 const areaSelectionCount = $("areaSelectionCount");
+const areaSelectedDetails = $("areaSelectedDetails");
 const copyAreaIdsButton = $("copyAreaIdsButton");
 const copyAreaIdsButtonText = $("copyAreaIdsButtonText");
 
@@ -49,6 +57,7 @@ let FIELD = null;
 
 let selectionLayer = null;
 let sketchViewModel = null;
+let selectionMode = "single";
 let areaDrawing = false;
 let areaSelectedFeatures = [];
 let areaSelectedIds = [];
@@ -252,7 +261,7 @@ try {
 await loadFeatureIndex();
 
 view.on("click", async (event) => {
-  if (areaDrawing) return;
+  if (selectionMode !== "single" || areaDrawing) return;
 
   try {
     const response = await view.hitTest(event, { include: [targetLayer] });
@@ -282,7 +291,19 @@ copyDetailId.addEventListener("click", async () => {
 previousFeatureButton.addEventListener("click", () => navigateRelative(-1));
 nextFeatureButton.addEventListener("click", () => navigateRelative(1));
 
+singleModeButton.addEventListener("click", () => {
+  setSelectionMode("single");
+});
+
+areaModeButton.addEventListener("click", () => {
+  setSelectionMode("area");
+});
+
 drawAreaButton.addEventListener("click", () => {
+  if (selectionMode !== "area") {
+    setSelectionMode("area");
+  }
+
   if (areaDrawing) {
     sketchViewModel.cancel();
     return;
@@ -292,7 +313,10 @@ drawAreaButton.addEventListener("click", () => {
 });
 
 clearAreaButton.addEventListener("click", () => {
-  clearAreaSelection();
+  clearAreaSelection({
+    keepInstruction: false,
+    restoreSingle: false
+  });
 });
 
 copyAreaIdsButton.addEventListener("click", async () => {
@@ -308,9 +332,72 @@ copyAreaIdsButton.addEventListener("click", async () => {
   }
 });
 
+function setSelectionMode(mode) {
+  if (mode !== "single" && mode !== "area") return;
+  if (selectionMode === mode) return;
+
+  selectionMode = mode;
+
+  const isSingle = mode === "single";
+
+  singleModeButton.classList.toggle("is-active", isSingle);
+  areaModeButton.classList.toggle("is-active", !isSingle);
+
+  singleModeButton.setAttribute("aria-pressed", String(isSingle));
+  areaModeButton.setAttribute("aria-pressed", String(!isSingle));
+
+  if (isSingle) {
+    // Gebiedsselectie volledig opruimen zodat er geen twee selecties tegelijk
+    // zichtbaar blijven.
+    clearAreaSelection({
+      keepInstruction: false,
+      restoreSingle: false
+    });
+
+    areaModePanel.classList.add("is-hidden");
+    singleModePanel.classList.remove("is-hidden");
+    singleDetailsScroll.classList.remove("is-hidden");
+
+    areaSelectedDetails.classList.add("is-hidden");
+    areaEmptyState.classList.remove("is-hidden");
+
+    resetSingleSelection();
+  } else {
+    // Ook de selectie van één punt opruimen wanneer de gebruiker overschakelt
+    // naar "Meerdere punten".
+    resetSingleSelection();
+
+    singleModePanel.classList.add("is-hidden");
+    singleDetailsScroll.classList.add("is-hidden");
+    areaModePanel.classList.remove("is-hidden");
+
+    areaEmptyState.classList.remove("is-hidden");
+    areaSelectedDetails.classList.add("is-hidden");
+
+    areaInstruction.textContent =
+      "Teken een polygoon om meerdere stroompunten te selecteren.";
+  }
+}
+
+function resetSingleSelection() {
+  selectedFeature = null;
+  selectedIndex = -1;
+
+  highlightHandle?.remove();
+  highlightHandle = null;
+
+  noSelection.classList.remove("is-hidden");
+  featureDetails.classList.add("is-hidden");
+
+  syncPager();
+}
+
 function startAreaDrawing() {
   // Nieuwe tekening vervangt de vorige gebiedsselectie.
-  clearAreaSelection({ keepInstruction: true });
+  clearAreaSelection({
+    keepInstruction: true,
+    restoreSingle: false
+  });
 
   areaDrawing = true;
   setDrawingUi(true);
@@ -404,6 +491,274 @@ function renderAreaSelectionResult() {
     count === 0
       ? "Er liggen geen stroompunten binnen de getekende polygoon."
       : "De geselecteerde stroompunten zijn op de kaart gemarkeerd.";
+
+  renderAreaSelectedDetails();
+}
+
+function renderAreaSelectedDetails() {
+  areaSelectedDetails.replaceChildren();
+
+  if (!areaSelectedFeatures.length) {
+    areaSelectedDetails.classList.add("is-hidden");
+    areaEmptyState.classList.remove("is-hidden");
+    return;
+  }
+
+  areaEmptyState.classList.add("is-hidden");
+  areaSelectedDetails.classList.remove("is-hidden");
+
+  const heading = document.createElement("div");
+  heading.className = "area-selected-heading";
+
+  const title = document.createElement("h2");
+  title.textContent = "Geselecteerde stroompunten";
+
+  const count = document.createElement("span");
+  count.textContent = `${areaSelectedFeatures.length} geselecteerd`;
+
+  heading.append(title, count);
+  areaSelectedDetails.appendChild(heading);
+
+  const sortedFeatures = [...areaSelectedFeatures].sort((a, b) =>
+    String(getFieldValue(a, "id") ?? "").localeCompare(
+      String(getFieldValue(b, "id") ?? ""),
+      "nl",
+      { numeric: true, sensitivity: "base" }
+    )
+  );
+
+  for (const feature of sortedFeatures) {
+    areaSelectedDetails.appendChild(createSelectedPointCard(feature));
+  }
+}
+
+function createSelectedPointCard(feature) {
+  const card = document.createElement("article");
+  card.className = "selected-point-card";
+
+  const oid = getObjectId(feature);
+  if (oid != null) {
+    card.dataset.objectId = String(oid);
+  }
+
+  const id = textFieldValue(feature, "id") || "—";
+  const adres = textFieldValue(feature, "adres");
+  const ligging = textFieldValue(feature, "ligging");
+  const totaal = numericFieldValue(feature, "totaal");
+
+  // Header
+  const header = document.createElement("div");
+  header.className = "selected-point-header";
+
+  const headerMain = document.createElement("div");
+  headerMain.className = "selected-point-header-main";
+
+  const headerTitle = document.createElement("strong");
+  headerTitle.textContent = "⚡ Elektrisch aansluitpunt";
+
+  const headerId = document.createElement("span");
+  headerId.textContent = `ID: ${id}`;
+
+  headerMain.append(headerTitle, headerId);
+
+  const actions = document.createElement("div");
+  actions.className = "selected-point-actions";
+
+  const locateButton = document.createElement("button");
+  locateButton.type = "button";
+  locateButton.className = "selected-point-action";
+  locateButton.title = "Toon op kaart";
+  locateButton.setAttribute("aria-label", `Toon ${id} op kaart`);
+  locateButton.textContent = "◎";
+  locateButton.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await focusAreaFeature(feature);
+  });
+
+  const copyButton = document.createElement("button");
+  copyButton.type = "button";
+  copyButton.className = "selected-point-action";
+  copyButton.title = "Kopieer ID";
+  copyButton.setAttribute("aria-label", `Kopieer ID ${id}`);
+  copyButton.textContent = "⧉";
+  copyButton.addEventListener("click", async (event) => {
+    event.stopPropagation();
+    await handleCopy(id);
+  });
+
+  actions.append(locateButton, copyButton);
+  header.append(headerMain, actions);
+  card.appendChild(header);
+
+  // Locatie
+  if (adres || ligging) {
+    const location = document.createElement("div");
+    location.className = "selected-point-location";
+
+    const label = document.createElement("div");
+    label.className = "selected-point-location-label";
+    label.textContent = "📍 Locatie";
+    location.appendChild(label);
+
+    if (adres) {
+      const address = document.createElement("div");
+      address.className = "selected-point-address";
+      address.textContent = adres;
+      location.appendChild(address);
+    }
+
+    if (ligging) {
+      const description = document.createElement("div");
+      description.className = "selected-point-description";
+      description.textContent = ligging;
+      location.appendChild(description);
+    }
+
+    card.appendChild(location);
+  }
+
+  // Totale stroomsterkte
+  const total = document.createElement("div");
+  total.className = "selected-point-total";
+
+  const totalLabel = document.createElement("div");
+  totalLabel.className = "selected-point-total-label";
+  totalLabel.textContent = "Totale stroomsterkte";
+
+  const totalValue = document.createElement("strong");
+  totalValue.textContent = `${formatNumber(totaal)} A`;
+
+  total.append(totalLabel, totalValue);
+  card.appendChild(total);
+
+  // Aansluitingen
+  const connectionData = getConnectionData(feature);
+
+  if (connectionData.hasAny) {
+    const connections = document.createElement("div");
+    connections.className = "selected-connections";
+
+    const head = document.createElement("div");
+    head.className = "selected-connections-head";
+
+    const headLabel = document.createElement("span");
+    headLabel.textContent = "Aansluitingen";
+
+    const headCount = document.createElement("span");
+    headCount.textContent = "Aantal";
+
+    head.append(headLabel, headCount);
+    connections.appendChild(head);
+
+    if (connectionData.stop16 !== 0) {
+      connections.appendChild(
+        createSelectedConnectionRow("🔌 Stopcontact 16 A", connectionData.stop16)
+      );
+    }
+
+    if (connectionData.blueRows.length) {
+      connections.appendChild(
+        createSelectedConnectionGroup("🔵 Blauw — 230 V", "blue")
+      );
+
+      for (const [label, value] of connectionData.blueRows) {
+        connections.appendChild(
+          createSelectedConnectionRow(label, value)
+        );
+      }
+    }
+
+    if (connectionData.redRows.length) {
+      connections.appendChild(
+        createSelectedConnectionGroup("🔴 Rood — 380 V", "red")
+      );
+
+      for (const [label, value] of connectionData.redRows) {
+        connections.appendChild(
+          createSelectedConnectionRow(label, value)
+        );
+      }
+    }
+
+    card.appendChild(connections);
+  }
+
+  const footer = document.createElement("div");
+  footer.className = "selected-point-footer";
+  footer.textContent = `ID: ${id}`;
+  card.appendChild(footer);
+
+  return card;
+}
+
+function getConnectionData(feature) {
+  const stop16 = numericFieldValue(feature, "stop16");
+
+  const blueRows = [
+    ["CEE 16 A", numericFieldValue(feature, "blauw16")],
+    ["CEE 32 A", numericFieldValue(feature, "blauw32")],
+    ["CEE 63 A", numericFieldValue(feature, "blauw63")]
+  ].filter(([, value]) => value !== 0);
+
+  const redRows = [
+    ["CEE 16 A", numericFieldValue(feature, "rood16")],
+    ["CEE 32 A", numericFieldValue(feature, "rood32")],
+    ["CEE 63 A", numericFieldValue(feature, "rood63")],
+    ["CEE 125 A", numericFieldValue(feature, "rood125")],
+    ["CEE 250 A", numericFieldValue(feature, "rood250")]
+  ].filter(([, value]) => value !== 0);
+
+  return {
+    stop16,
+    blueRows,
+    redRows,
+    hasAny: stop16 !== 0 || blueRows.length > 0 || redRows.length > 0
+  };
+}
+
+function createSelectedConnectionGroup(label, className) {
+  const group = document.createElement("div");
+  group.className = `selected-connection-group ${className}`;
+  group.textContent = label;
+  return group;
+}
+
+function createSelectedConnectionRow(label, value) {
+  const row = document.createElement("div");
+  row.className = "selected-connection-row";
+
+  const labelElement = document.createElement("span");
+  labelElement.textContent = label;
+
+  const valueElement = document.createElement("span");
+  valueElement.className = "count";
+  valueElement.textContent = formatNumber(value);
+
+  row.append(labelElement, valueElement);
+  return row;
+}
+
+async function focusAreaFeature(feature) {
+  if (!feature?.geometry) return;
+
+  // In gebiedsmodus blijft de meervoudige selectie actief. We zoomen enkel
+  // naar het gekozen punt zonder van selectiemodus te veranderen.
+  try {
+    await view.goTo(
+      {
+        target: feature.geometry,
+        zoom: CONFIG.pagerZoom ?? 16.5
+      },
+      {
+        duration: 650,
+        easing: "ease-in-out"
+      }
+    );
+  } catch (error) {
+    if (error?.name !== "AbortError") {
+      console.warn("Zoomen naar geselecteerd gebiedspunt mislukt:", error);
+    }
+  }
 }
 
 function updateAreaHighlight(features) {
@@ -426,7 +781,10 @@ function updateAreaHighlight(features) {
 }
 
 function clearAreaSelection(options = {}) {
-  const { keepInstruction = false } = options;
+  const {
+    keepInstruction = false,
+    restoreSingle = true
+  } = options;
 
   if (areaDrawing) {
     try {
@@ -445,6 +803,10 @@ function clearAreaSelection(options = {}) {
   areaSelectedFeatures = [];
   areaSelectedIds = [];
 
+  areaSelectedDetails.replaceChildren();
+  areaSelectedDetails.classList.add("is-hidden");
+  areaEmptyState.classList.remove("is-hidden");
+
   areaSelectionResult.classList.add("is-hidden");
   copyAreaIdsButton.disabled = true;
   clearAreaButton.disabled = true;
@@ -454,6 +816,10 @@ function clearAreaSelection(options = {}) {
   if (!keepInstruction) {
     areaInstruction.textContent =
       "Teken een polygoon om meerdere stroompunten te selecteren.";
+  }
+
+  if (restoreSingle && selectionMode === "single") {
+    resetSingleSelection();
   }
 }
 
@@ -618,7 +984,7 @@ async function loadFeatureIndex() {
 }
 
 function selectFeature(feature) {
-  if (!feature) return;
+  if (!feature || selectionMode !== "single") return;
 
   selectedFeature = feature;
   const oid = getObjectId(feature);
@@ -744,7 +1110,7 @@ function createRow(label, value) {
 }
 
 async function navigateRelative(delta) {
-  if (!allFeatures.length) return;
+  if (selectionMode !== "single" || !allFeatures.length) return;
 
   let index = selectedIndex;
   if (index < 0) index = delta > 0 ? -1 : 0;
