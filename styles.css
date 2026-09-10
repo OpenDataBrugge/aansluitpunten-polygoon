@@ -1,0 +1,658 @@
+:root {
+  --brand-blue: #0d3fdb;
+  --brand-blue-dark: #0831b1;
+  --panel-width: 455px;
+  --header-height: 54px;
+  --ink: #222;
+  --muted: #666;
+  font-family: Arial, Helvetica, sans-serif;
+  color: var(--ink);
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  overflow: hidden;
+  background: #fff;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+/* Header */
+.app-header {
+  height: var(--header-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--brand-blue);
+  color: #fff;
+  position: relative;
+  z-index: 30;
+}
+
+.brand {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.brugge-wordmark {
+  width: 42px;
+  min-width: 42px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding-left: 2px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: .82;
+  letter-spacing: 2.4px;
+}
+
+.app-title {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding-left: 7px;
+  font-size: 21px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-toggle {
+  display: none;
+  margin-right: 10px;
+  width: 38px;
+  height: 34px;
+  border: 1px solid rgba(255,255,255,.3);
+  border-radius: 3px;
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+/* Hoofdindeling */
+.app-shell {
+  width: 100%;
+  height: calc(100% - var(--header-height));
+  display: flex;
+}
+
+.side-panel {
+  width: var(--panel-width);
+  min-width: var(--panel-width);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  border-right: 1px solid #cfcfd3;
+  box-shadow: 2px 0 7px rgba(0,0,0,.06);
+  overflow: hidden;
+  position: relative;
+  z-index: 20;
+}
+
+.pager {
+  flex: 0 0 40px;
+  display: grid;
+  grid-template-columns: 34px 1fr 34px;
+  align-items: center;
+  border-bottom: 1px solid #bdbdc1;
+  background: #fff;
+}
+
+.pager-button {
+  height: 100%;
+  border: 0;
+  background: transparent;
+  color: #777b83;
+}
+
+.pager-button:hover:not(:disabled) {
+  background: #f3f4f5;
+  color: var(--brand-blue);
+}
+
+.pager-button:disabled {
+  opacity: .35;
+  cursor: default;
+}
+
+#pagerText {
+  color: #752735;
+  font-size: 12px;
+  padding-left: 3px;
+}
+
+.details-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #fff;
+}
+
+/* Compact beginscherm */
+.empty-card {
+  height: 116px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 26px;
+  border-bottom: 1px solid #ececef;
+}
+
+.empty-bolt {
+  flex: 0 0 auto;
+  color: #ff7142;
+  font-size: 26px;
+}
+
+.empty-card h1 {
+  margin: 0 0 5px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.empty-card p {
+  margin: 0;
+  color: #707783;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+/* Sidebar in de stijl van de Arcade-expressie */
+.feature-details {
+  padding: 20px 26px 26px;
+}
+
+.arcade-card {
+  width: 100%;
+  max-width: 380px;
+  margin: 0 auto;
+  font-size: 13px;
+}
+
+.arcade-header {
+  min-height: 58px;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  background: #1a3f6f;
+  color: #fff;
+  border-radius: 6px 6px 0 0;
+  overflow: hidden;
+}
+
+.arcade-header-main {
+  min-width: 0;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.arcade-header-main strong {
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.arcade-header-main span {
+  margin-top: 3px;
+  font-size: 11px;
+  opacity: .78;
+  overflow-wrap: anywhere;
+}
+
+.copy-button {
+  flex: 0 0 auto;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,.16);
+  background: rgba(255,255,255,.08);
+  color: #fff;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+}
+
+.copy-button:hover {
+  background: rgba(255,255,255,.15);
+}
+
+.location-section {
+  padding: 10px 14px;
+  border-bottom: 1px solid #e5e5e5;
+}
+
+.section-kicker {
+  font-size: 11px;
+  color: #888;
+  text-transform: uppercase;
+  margin-bottom: 2px;
+}
+
+.adres {
+  font-size: 13px;
+  font-weight: 600;
+  color: #222;
+  line-height: 1.35;
+}
+
+.ligging {
+  margin-top: 2px;
+  font-size: 12px;
+  color: #555;
+  line-height: 1.35;
+}
+
+.total-section {
+  background: #e8f4fd;
+  border: 1px solid #b5d4f4;
+  padding: 10px 14px;
+}
+
+.total-label {
+  font-size: 11px;
+  color: #185FA5;
+  text-transform: uppercase;
+}
+
+.total-value {
+  display: block;
+  margin-top: 2px;
+  font-size: 20px;
+  color: #0C447C;
+}
+
+.connections-section {
+  width: 100%;
+  margin-top: 6px;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.table-head {
+  min-height: 34px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 76px;
+  align-items: center;
+  background: #f2f2f2;
+  color: #333;
+  font-weight: 700;
+}
+
+.table-head span {
+  padding: 8px 14px;
+}
+
+.table-head span:last-child {
+  text-align: right;
+}
+
+.connection-row {
+  min-height: 31px;
+  display: grid;
+  grid-template-columns: minmax(0,1fr) 76px;
+  align-items: center;
+}
+
+.connection-row span {
+  padding: 6px 14px;
+}
+
+.connection-row .count {
+  text-align: right;
+  font-weight: 600;
+}
+
+.connection-group {
+  min-height: 31px;
+  display: flex;
+  align-items: center;
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.connection-group.blue {
+  background: #f0f7ff;
+  color: #185FA5;
+}
+
+.connection-group.red {
+  background: #fff0f0;
+  color: #A32D2D;
+}
+
+.arcade-footer {
+  background: #f7f7f7;
+  padding: 7px 14px;
+  border-top: 1px solid #ddd;
+  font-size: 11px;
+  color: #999;
+  border-radius: 0 0 6px 6px;
+  overflow-wrap: anywhere;
+}
+
+.map-panel {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+arcgis-map {
+  width: 100%;
+  height: 100%;
+}
+
+/* Feedback */
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 9999;
+  transform: translate(-50%, 18px);
+  max-width: min(90vw, 520px);
+  background: #27313d;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 4px;
+  box-shadow: 0 4px 18px rgba(0,0,0,.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .14s ease, transform .14s ease;
+  font-size: 12px;
+}
+
+.toast--visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.toast--error {
+  background: #922a2a;
+}
+
+@media (max-width: 900px) {
+  :root {
+    --panel-width: min(94vw, 455px);
+  }
+
+  .mobile-toggle {
+    display: block;
+  }
+
+  .side-panel {
+    position: fixed;
+    left: 0;
+    top: var(--header-height);
+    bottom: 0;
+    height: calc(100% - var(--header-height));
+    transform: translateX(-103%);
+    transition: transform .18s ease;
+    box-shadow: 8px 0 22px rgba(0,0,0,.2);
+  }
+
+  .side-panel.is-open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 520px) {
+  :root {
+    --panel-width: 100vw;
+  }
+
+  .app-title {
+    font-size: 19px;
+  }
+
+  .feature-details {
+    padding: 16px 18px 22px;
+  }
+
+  .empty-card {
+    height: 104px;
+    padding: 15px 20px;
+  }
+}
+
+
+/* ==========================================================================
+   v16 — Header afgestemd op de Experience Builder-header
+   ========================================================================== */
+
+:root {
+  --header-height: 58px;
+}
+
+.app-header {
+  height: var(--header-height);
+  padding: 0 12px 0 0;
+  background: #0d3fdb;
+  overflow: hidden;
+}
+
+/*
+  De Experience Builder-header bestaat uit twee flex-items:
+  1. een image-widget met het officiële witte BRUGGE-logo;
+  2. een text-widget met Stroomaansluitingen in 20 px.
+*/
+.brand {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.brand-logo-widget {
+  width: 43px;
+  min-width: 43px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+  border-radius: 4px;
+}
+
+.brugge-logo {
+  display: block;
+  width: 35px;
+  height: auto;
+  max-height: 36px;
+  object-fit: contain;
+  object-position: left center;
+}
+
+.brand-title-widget {
+  height: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  padding-left: 7px;
+  border-radius: 4px;
+}
+
+.brand-title-widget h1 {
+  margin: 0;
+  padding: 0;
+  color: #fff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+  line-height: 1;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* De oude zelfgetekende wordmark/titel zijn in v16 niet meer in de HTML. */
+.brugge-wordmark,
+.app-title {
+  display: none !important;
+}
+
+/* Houd de kaart/panelhoogte exact in lijn met de iets hogere header. */
+.app-shell {
+  height: calc(100% - var(--header-height));
+}
+
+@media (max-width: 520px) {
+  .brand-logo-widget {
+    width: 41px;
+    min-width: 41px;
+  }
+
+  .brugge-logo {
+    width: 33px;
+  }
+
+  .brand-title-widget {
+    padding-left: 5px;
+  }
+
+  .brand-title-widget h1 {
+    font-size: 19px;
+  }
+}
+
+
+/* ==========================================================================
+   v17 — Polygoonselectie van stroompunten
+   ========================================================================== */
+
+.area-tools {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-bottom: 1px solid #d9dadd;
+  background: #fff;
+}
+
+.area-tools-buttons {
+  display: flex;
+  gap: 7px;
+}
+
+.area-button {
+  min-height: 34px;
+  border-radius: 4px;
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.area-button-primary {
+  flex: 1 1 auto;
+  border: 1px solid #0d3fdb;
+  background: #0d3fdb;
+  color: #fff;
+}
+
+.area-button-primary:hover {
+  background: #0831b1;
+  border-color: #0831b1;
+}
+
+.area-button-primary.is-drawing {
+  background: #fff;
+  color: #0d3fdb;
+}
+
+.area-button-secondary {
+  flex: 0 0 auto;
+  border: 1px solid #c9cbd0;
+  background: #fff;
+  color: #444;
+}
+
+.area-button-secondary:hover:not(:disabled) {
+  background: #f4f5f6;
+}
+
+.area-button:disabled,
+.copy-area-button:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+.area-instruction {
+  margin-top: 7px;
+  color: #777d85;
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.area-selection-result {
+  margin-top: 9px;
+  border: 1px solid #b5d4f4;
+  background: #f4f9fe;
+  border-radius: 5px;
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.area-result-text {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.area-result-text strong {
+  color: #0C447C;
+  font-size: 12px;
+}
+
+.area-result-text span {
+  color: #65717d;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.copy-area-button {
+  flex: 0 0 auto;
+  min-height: 32px;
+  border: 0;
+  border-radius: 4px;
+  background: #1a3f6f;
+  color: #fff;
+  padding: 7px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.copy-area-button:hover:not(:disabled) {
+  background: #12335d;
+}
+
+/* Tijdens tekenen krijgt de kaart een duidelijke teken-cursor. */
+arcgis-map.area-drawing {
+  cursor: crosshair;
+}

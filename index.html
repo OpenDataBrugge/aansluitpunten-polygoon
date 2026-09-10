@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0d3fdb" />
+  <title>Stroomaansluitingen | Stad Brugge</title>
+
+  <script type="module" src="https://js.arcgis.com/5.1/"></script>
+  <link rel="stylesheet" href="./styles.css?v=17" />
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-logo-widget">
+        <img
+          class="brugge-logo"
+          src="https://www.arcgis.com/sharing/rest/content/items/a0fe59291cae4a8c8a027b5e62c26f7a/resources/images/widget_2/1779611205215.png"
+          alt="Brugge"
+        />
+      </div>
+
+      <div class="brand-title-widget">
+        <h1>Stroomaansluitingen</h1>
+      </div>
+    </div>
+
+    <button id="mobilePanelToggle" class="mobile-toggle" type="button" aria-label="Toon zijpaneel">☰</button>
+  </header>
+
+  <main class="app-shell">
+    <aside id="sidePanel" class="side-panel">
+      <div class="pager">
+        <button id="previousFeature" class="pager-button" type="button" aria-label="Vorige aansluiting">&lt;</button>
+        <span id="pagerText">0 van 0</span>
+        <button id="nextFeature" class="pager-button" type="button" aria-label="Volgende aansluiting">&gt;</button>
+      </div>
+
+      <section class="area-tools" aria-label="Gebiedsselectie">
+        <div class="area-tools-buttons">
+          <button id="drawAreaButton" class="area-button area-button-primary" type="button">
+            <span aria-hidden="true">⬡</span>
+            <span id="drawAreaButtonText">Selecteer gebied</span>
+          </button>
+
+          <button id="clearAreaButton" class="area-button area-button-secondary" type="button" disabled>
+            Wis selectie
+          </button>
+        </div>
+
+        <div id="areaInstruction" class="area-instruction">
+          Teken een polygoon om meerdere stroompunten te selecteren.
+        </div>
+
+        <div id="areaSelectionResult" class="area-selection-result is-hidden">
+          <div class="area-result-text">
+            <strong id="areaSelectionCount">0 stroompunten geselecteerd</strong>
+            <span>De ID's worden één per regel naar het klembord gekopieerd.</span>
+          </div>
+
+          <button id="copyAreaIdsButton" class="copy-area-button" type="button" disabled>
+            <span aria-hidden="true">⧉</span>
+            <span id="copyAreaIdsButtonText">Kopieer ID's</span>
+          </button>
+        </div>
+      </section>
+
+      <section class="details-scroll">
+        <div id="noSelection" class="empty-card">
+          <div class="empty-bolt">⚡</div>
+          <div>
+            <h1>Selecteer een stroomaansluiting</h1>
+            <p>Klik een punt op de kaart aan om de details te bekijken.</p>
+          </div>
+        </div>
+
+        <div id="featureDetails" class="feature-details is-hidden">
+          <div class="arcade-card">
+            <div class="arcade-header">
+              <div class="arcade-header-main">
+                <strong>⚡ Elektrisch aansluitpunt</strong>
+                <span id="headerId">ID: —</span>
+              </div>
+
+              <button id="copyDetailId" class="copy-button" type="button" title="Kopieer ID">
+                <span aria-hidden="true">⧉</span>
+                <span>Kopieer</span>
+              </button>
+            </div>
+
+            <div class="location-section">
+              <div class="section-kicker">📍 Locatie</div>
+              <div id="adres" class="adres"></div>
+              <div id="ligging" class="ligging"></div>
+            </div>
+
+            <div class="total-section">
+              <div class="total-label">Totale stroomsterkte</div>
+              <strong id="totaal" class="total-value">0 A</strong>
+            </div>
+
+            <div id="connectionsSection" class="connections-section is-hidden">
+              <div class="table-head">
+                <span>Aansluitingen</span>
+                <span>Aantal</span>
+              </div>
+
+              <div id="stopcontactSection"></div>
+              <div id="blauwSection"></div>
+              <div id="roodSection"></div>
+            </div>
+
+            <div id="footerId" class="arcade-footer">ID: —</div>
+          </div>
+        </div>
+      </section>
+    </aside>
+
+    <section class="map-panel">
+      <arcgis-map id="map">
+        <arcgis-zoom slot="top-left"></arcgis-zoom>
+        <arcgis-home slot="top-left"></arcgis-home>
+        <arcgis-locate slot="top-left"></arcgis-locate>
+        <arcgis-search slot="top-right"></arcgis-search>
+      </arcgis-map>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="./app.js?v=17"></script>
+</body>
+</html>
