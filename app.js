@@ -1,6 +1,6 @@
-import { CONFIG } from "./config.js?v=22";
+import { CONFIG } from "./config.js";
 
-const APP_VERSION = "22.0.0";
+const APP_VERSION = "26.0.0";
 console.info(`Stroomaansluitingen app v${APP_VERSION}`);
 
 const $ = (id) => document.getElementById(id);
@@ -441,8 +441,16 @@ copyAreaIdsButton.addEventListener("click", async () => {
 
   try {
     const separator = CONFIG.areaCopySeparator ?? "\n";
-    await copyToClipboard(areaSelectedIds.join(separator));
-    showToast(`✓ ${areaSelectedIds.length} ID's gekopieerd`);
+    const copyIds = [
+      ...new Set(
+        areaSelectedIds
+          .map((value) => getCopyId(value))
+          .filter(Boolean)
+      )
+    ];
+
+    await copyToClipboard(copyIds.join(separator));
+    showToast(`✓ ${copyIds.length} ID's gekopieerd`);
   } catch (error) {
     console.error("Gebieds-ID's kopiëren mislukt:", error);
     showToast("Kopiëren van de geselecteerde ID's is mislukt.", true);
@@ -666,7 +674,7 @@ function createSelectedPointCard(feature) {
   const id = textFieldValue(feature, "id") || "—";
   const adres = textFieldValue(feature, "adres");
   const ligging = textFieldValue(feature, "ligging");
-  const totaal = numericFieldValue(feature, "totaal");
+  const totaalRaw = getTotalRawValue(feature);
 
   // Header
   const header = document.createElement("div");
@@ -748,7 +756,7 @@ function createSelectedPointCard(feature) {
   totalLabel.textContent = "Totale stroomsterkte";
 
   const totalValue = document.createElement("strong");
-  totalValue.textContent = `${formatNumber(totaal)} A`;
+  totalValue.textContent = formatTotalDisplayValue(totaalRaw);
 
   total.append(totalLabel, totalValue);
   card.appendChild(total);
@@ -1152,8 +1160,7 @@ function renderDetails(feature) {
   const adres = textFieldValue(feature, "adres");
   const ligging = textFieldValue(feature, "ligging");
 
-  const totaalRaw = getFieldValue(feature, "totaal");
-  const totaal = parseNumericValue(totaalRaw);
+  const totaalRaw = getTotalRawValue(feature);
 
   headerId.textContent = `ID: ${id}`;
   footerId.textContent = `ID: ${id}`;
@@ -1161,8 +1168,10 @@ function renderDetails(feature) {
   adresElement.textContent = adres;
   liggingElement.textContent = ligging;
 
-  // Net zoals in de Arcade-expressie blijft deze sectie altijd zichtbaar.
-  totaalElement.textContent = `${formatNumber(totaal)} A`;
+  // TOTAAL_VERMOGEN kan ook tekst bevatten, bv. "150 (MKT2+EVN2)".
+  // Toon daarom de volledige veldwaarde i.p.v. die altijd numeriek te parsen.
+  totaalElement.textContent = formatTotalDisplayValue(totaalRaw);
+  console.info("TOTAAL_VERMOGEN weergegeven:", totaalRaw);
 
   stopcontactSection.replaceChildren();
   blauwSection.replaceChildren();
@@ -1340,6 +1349,126 @@ function numericFieldValue(feature, semanticKey) {
   return parseNumericValue(getFieldValue(feature, semanticKey));
 }
 
+function getTotalRawValue(feature) {
+  const attributes = feature?.attributes || {};
+  const fields = targetLayer?.fields || [];
+
+  // Verzamel alle kandidaatvelden die duidelijk "totaal vermogen" of
+  // "totale stroomsterkte" voorstellen.
+  const candidateNames = new Set();
+
+  const exactCandidates = [
+    "TOTAAL_VERMOGEN",
+    "TOTAAL_STROOMSTERKTE",
+    "TOTALE_STROOMSTERKTE",
+    "STROOMSTERKTE_TOTAAL"
+  ];
+
+  for (const wanted of exactCandidates) {
+    const key = Object.keys(attributes).find(
+      (name) => name.toLowerCase() === wanted.toLowerCase()
+    );
+    if (key) candidateNames.add(key);
+  }
+
+  if (FIELD?.totaal) {
+    candidateNames.add(FIELD.totaal);
+  }
+
+  for (const field of fields) {
+    const text = normalizeFieldText(`${field.name} ${field.alias || ""}`);
+
+    const isTotalPower =
+      (text.includes("totaal") && text.includes("vermogen")) ||
+      (text.includes("totaal") && text.includes("stroomsterkte")) ||
+      (text.includes("totale") && text.includes("stroomsterkte"));
+
+    if (isTotalPower) {
+      candidateNames.add(field.name);
+    }
+  }
+
+  const candidates = [...candidateNames]
+    .map((name) => ({
+      name,
+      value: attributes[name]
+    }))
+    .filter(({ value }) => value != null && String(value).trim() !== "");
+
+  if (!candidates.length) {
+    return null;
+  }
+
+  // Geef voorrang aan informatieve tekstwaarden zoals "150 (MKT2+EVN2)".
+  const richText = candidates.find(({ value }) => {
+    if (typeof value !== "string") return false;
+    const text = value.trim();
+    return /[A-Za-z()]/.test(text) && text !== "0";
+  });
+
+  if (richText) {
+    return richText.value;
+  }
+
+  // Daarna een niet-nulwaarde.
+  const nonZero = candidates.find(({ value }) => {
+    if (typeof value === "number") return value !== 0;
+    const text = String(value).trim();
+    if (text === "0" || text === "0,0" || text === "0.0") return false;
+    return true;
+  });
+
+  return (nonZero || candidates[0]).value;
+}
+
+function formatTotalDisplayValue(raw) {
+  if (raw == null || String(raw).trim() === "") {
+    return "0 A";
+  }
+
+  if (typeof raw === "number") {
+    return `${formatNumber(raw)} A`;
+  }
+
+  const text = String(raw).trim();
+
+  // Toon in de fiche enkel de eerste numerieke waarde uit het veld.
+  // Voorbeeld:
+  // "150 (MKT2+EVN2)" -> "150 A"
+  // De cijfers 2 en 2 uit MKT2/EVN2 worden bewust genegeerd.
+  const match = text.match(/[+-]?\d[\d\s.,]*/);
+
+  if (!match) {
+    return "0 A";
+  }
+
+  let numericText = match[0].trim();
+
+  // Verwijder eventuele losse spaties in duizendtallen.
+  numericText = numericText.replace(/\s+/g, "");
+
+  const hasComma = numericText.includes(",");
+  const hasDot = numericText.includes(".");
+
+  if (hasComma && hasDot) {
+    if (numericText.lastIndexOf(",") > numericText.lastIndexOf(".")) {
+      // Belgische notatie: 1.250,5
+      numericText = numericText.replace(/\./g, "").replace(",", ".");
+    } else {
+      // Engelse notatie: 1,250.5
+      numericText = numericText.replace(/,/g, "");
+    }
+  } else if (hasComma) {
+    numericText = numericText.replace(",", ".");
+  }
+
+  const numeric = Number(numericText);
+
+  return Number.isFinite(numeric)
+    ? `${formatNumber(numeric)} A`
+    : "0 A";
+}
+
 // Robuuster dan Number(value):
 //  "63"       -> 63
 //  "63,0"     -> 63
@@ -1385,15 +1514,33 @@ function formatNumber(value) {
   }).format(value);
 }
 
+function getCopyId(value) {
+  if (value == null) return "";
+
+  // trim() verwijdert ook veel Unicode-whitespace aan begin/einde.
+  const text = String(value).trim();
+  if (!text) return "";
+
+  // Kopieer expliciet alleen tot aan de eerste whitespace.
+  // Dit vangt gewone spaties, tabs, non-breaking spaces en andere
+  // Unicode-spaties op.
+  const match = text.match(/^[^\s\u00A0\u202F\u2000-\u200B]+/u);
+
+  return match ? match[0] : "";
+}
+
 async function handleCopy(value) {
-  if (value == null || String(value).trim() === "") {
+  const copyValue = getCopyId(value);
+  console.info("ID kopiëren:", { volledig: value, gekopieerd: copyValue });
+
+  if (!copyValue) {
     showToast(`Veld ${CONFIG.copyField} is leeg.`, true);
     return;
   }
 
   try {
-    await copyToClipboard(String(value));
-    showToast(`✓ Gekopieerd: ${value}`);
+    await copyToClipboard(copyValue);
+    showToast(`✓ Gekopieerd: ${copyValue}`);
   } catch (error) {
     console.error("Kopiëren mislukt:", error);
     showToast("Kopiëren naar het klembord is mislukt.", true);

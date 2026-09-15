@@ -1642,3 +1642,10 @@ arcgis-map.area-drawing {
     transition: none !important;
   }
 }
+
+.help-build {
+  margin-right: auto;
+  align-self: center;
+  color: #8a8f96;
+  font-size: 10px;
+}

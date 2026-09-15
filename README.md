@@ -25,3 +25,17 @@ Alle andere functies uit v25 blijven behouden, inclusief:
 Na deployment moet in de console staan:
 
 `Stroomaansluitingen app v26.0.0`
+
+
+## Bestandsnamen
+
+De versieaanduiding is uit de bestandsnamen verwijderd.
+
+De app gebruikt nu opnieuw:
+
+- `index.html`
+- `app.js`
+- `config.js`
+- `styles.css`
+
+De interne applicatieversie blijft `26.0.0` voor controle in de browserconsole.
