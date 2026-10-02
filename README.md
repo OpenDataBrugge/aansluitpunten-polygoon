@@ -1,41 +1,15 @@
-# Stroomaansluitingen — v26 totaal vermogen enkel numeriek
+# Stroomaansluitingen — v27
 
-Deze versie bouwt voort op v25.
+Deze versie bouwt voort op v26 en is aangepast aan het nieuwe schema van de stroomaansluitingen.
 
-Aanpassing:
-- in de fiche wordt bij `TOTAAL_VERMOGEN` alleen de eerste numerieke waarde weergegeven;
-- extra tekst tussen haakjes wordt niet getoond;
-- cijfers die deel uitmaken van codes zoals `MKT2` of `EVN2` worden genegeerd.
+Belangrijkste wijziging:
+- `BLAUW_230V_32A` is vervangen door twee afzonderlijke velden:
+  - `BLAUW_230V_32A_2F`
+  - `BLAUW_230V_32A_3F`
+- in de detailweergave worden deze getoond als `CEE 32 A — 2F` en `CEE 32 A — 3F`;
+- de automatische veldherkenning en laagselectie verwachten nu beide nieuwe velden;
+- de overige functies uit v26 blijven behouden.
 
-Voorbeelden:
+Na deployment moet in de browserconsole staan:
 
-`150 (MKT2+EVN2)` → `150 A`
-
-`63 A` → `63 A`
-
-`1.250,5 (extra info)` → `1.250,5 A`
-
-Alle andere functies uit v25 blijven behouden, inclusief:
-- ID kopiëren tot aan de eerste spatie;
-- selectie van één punt;
-- polygoonselectie van meerdere punten;
-- mobiele en desktopweergave;
-- helpfunctie.
-
-Na deployment moet in de console staan:
-
-`Stroomaansluitingen app v26.0.0`
-
-
-## Bestandsnamen
-
-De versieaanduiding is uit de bestandsnamen verwijderd.
-
-De app gebruikt nu opnieuw:
-
-- `index.html`
-- `app.js`
-- `config.js`
-- `styles.css`
-
-De interne applicatieversie blijft `26.0.0` voor controle in de browserconsole.
+`Stroomaansluitingen app v27.0.0`
